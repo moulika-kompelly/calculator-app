@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contact Book</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f4f4;
+            text-align: center;
+        }
+
+        .container {
+            width: 400px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px gray;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 5px;
+        }
+        button {
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            background: blue;
+            color: white;
+            cursor: pointer;
+        }
+         button:hover {
+            background: darkblue;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: #eee;
+            margin: 5px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .delete-btn {
+            background: red;
+        }
+    </style>
+    </head>
+<body>
+
+<div class="container">
+    <h2>📞 Contact Book</h2>
+
+    <input type="text" id="name" placeholder="Enter Name">
+    <input type="text" id="phone" placeholder="Enter Phone">
+    <br>
+    <button onclick="addContact()">Add Contact</button>
+
+    <h3>Contact List</h3>
+    <ul id="list"></ul>
+</div>
+<script>
+
+const API = "http://127.0.0.1:8000";
+
+// Add contact
+function addContact() {
+    const name = document.getElementById("name").value;
+    const phone = document.getElementById("phone").value;
+
+    if (!name || !phone) {
+        alert("Please enter both name and phone");
+        return;
+    }
+    fetch(`${API}/add?name=${name}&phone=${phone}`, {
+        method: "POST"
+    })
+    .then(() => {
+        document.getElementById("name").value = "";
+        document.getElementById("phone").value = "";
+        loadContacts();
+    });
+}
+
+// Load contacts
+function loadContacts() {
+    fetch(`${API}/contacts`)
+    .then(res => res.json())
+    .then(data => {
+        const list = document.getElementById("list");
+        list.innerHTML = "";
+
+        for (let name in data) {
+            const li = document.createElement("li");
+
+            li.innerHTML = `
+                ${name} : ${data[name]}
+                <button class="delete-btn" onclick="deleteContact('${name}')">Delete</button>
+            `;
+
+            list.appendChild(li);
+        }
+    });
+}
+
+// Delete contact
+function deleteContact(name) {
+    fetch(`${API}/delete/${name}`, {
+        method: "DELETE"
+    })
+    .then(() => loadContacts());
+}
+
+// Load when page opens
+loadContacts();
+
+</script>
+
+</body>
+</html>
+
